@@ -1,0 +1,47 @@
+[
+  {
+    "question": "What services do you offer?",
+    "answer": "We offer ERP Integration, CRM Solutions, Custom Development, Cloud Consulting, Cloud Hosting and VPS Solutions. Visit the Solutions page to learn more about each.",
+    "keywords": ["service", "services", "offer", "solutions", "what do you do", "products"]
+  },
+  {
+    "question": "Which industries do you work with?",
+    "answer": "We serve Banking & Finance, Healthcare, Retail, Manufacturing and Education. Check out the Industries page for details on each sector.",
+    "keywords": ["industry", "industries", "sector", "sectors", "work with", "clients"]
+  },
+  {
+    "question": "How can I contact you?",
+    "answer": "You can reach us at contact@ai-solution.com.np or +977 1 4123456. You can also fill out the form on our Contact page and we'll get back to you.",
+    "keywords": ["contact", "reach", "email", "phone", "call", "get in touch", "support"]
+  },
+  {
+    "question": "Where are you located?",
+    "answer": "Our office is at Durbar Marg, Kathmandu 44600, Nepal. We work with clients across all 7 provinces of Nepal.",
+    "keywords": ["location", "located", "address", "office", "where are you", "place"]
+  },
+  {
+    "question": "Do you offer cloud hosting?",
+    "answer": "Yes. We provide enterprise-grade Cloud Hosting with a 99.9% uptime SLA, auto-scaling, and 24/7 monitoring, plus high-performance VPS Solutions with dedicated resources.",
+    "keywords": ["cloud", "hosting", "vps", "server", "uptime", "infrastructure"]
+  },
+  {
+    "question": "Can you build custom software?",
+    "answer": "Absolutely. Our Custom Development team builds bespoke software from scratch — including API integration, microservices, CI/CD setup, full QA, and ongoing support.",
+    "keywords": ["custom", "build", "develop", "development", "software", "bespoke", "app"]
+  },
+  {
+    "question": "Are there any upcoming events?",
+    "answer": "Yes! We host events like the AI & Enterprise Summit and Cloud Transformation Workshops. Visit our Events/Gallery section to see the latest schedule.",
+    "keywords": ["event", "events", "summit", "workshop", "conference", "webinar"]
+  },
+  {
+    "question": "How do I request a quote or demo?",
+    "answer": "Head to our Contact page and submit an inquiry with your requirements. Our team will reach out to schedule a demo or prepare a tailored quote.",
+    "keywords": ["quote", "demo", "pricing", "price", "cost", "estimate", "request"]
+  },
+  {
+    "question": "What are your business hours?",
+    "answer": "Our support team is available 24/7 for hosting and infrastructure. For sales and consulting, we're available Sunday to Friday, 9am–6pm NPT.",
+    "keywords": ["hours", "open", "timing", "available", "business hours", "when"]
+  }
+]
