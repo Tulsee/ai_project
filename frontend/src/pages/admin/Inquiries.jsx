@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
 import * as store from '../../data/store'
+import { useDialog } from '../../components/ui/Dialog'
 import { card, btn, ghostBtn, pageTitle } from '../../components/admin/ui'
 
 export default function Inquiries() {
   const [inquiries, setInquiries] = useState([])
   const [search, setSearch] = useState('')
+  const { confirm, alert } = useDialog()
 
   useEffect(() => {
     const refresh = () => setInquiries(store.getAll('inquiries'))
@@ -27,14 +29,14 @@ export default function Inquiries() {
   }
 
   const deleteOne = async (q) => {
-    if (window.confirm(`Delete inquiry from ${q.name}?`)) {
-      try { await store.remove('inquiries', q.id) } catch (err) { alert(err.message || 'Delete failed.') }
-    }
+    const ok = await confirm({ title: 'Delete inquiry', message: `Delete inquiry from ${q.name}?`, confirmLabel: 'Delete' })
+    if (!ok) return
+    try { await store.remove('inquiries', q.id) } catch (err) { alert({ title: 'Delete failed', message: err.message || 'Delete failed.' }) }
   }
   const clearAll = async () => {
-    if (window.confirm('Delete ALL inquiries? This cannot be undone.')) {
-      try { await store.clear('inquiries') } catch (err) { alert(err.message || 'Clear failed.') }
-    }
+    const ok = await confirm({ title: 'Delete all inquiries', message: 'Delete ALL inquiries? This cannot be undone.', confirmLabel: 'Delete All' })
+    if (!ok) return
+    try { await store.clear('inquiries') } catch (err) { alert({ title: 'Clear failed', message: err.message || 'Clear failed.' }) }
   }
 
   return (
@@ -51,9 +53,9 @@ export default function Inquiries() {
       </div>
 
       <div style={{ ...card, overflow: 'hidden' }}>
-        <div style={{ padding: '16px 20px', borderBottom: '1px solid #f0f0f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px' }}>
+        <div style={{ padding: '16px 20px', borderBottom: '1px solid #f0f0f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
           <span style={{ fontSize: '14px', fontWeight: 600, color: '#0A1F3D' }}>{filtered.length} inquir{filtered.length === 1 ? 'y' : 'ies'}</span>
-          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search name, email, company…" style={{ padding: '8px 14px', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '13px', outline: 'none', width: '280px', fontFamily: 'Inter, sans-serif' }} />
+          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search name, email, company…" style={{ padding: '8px 14px', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '13px', outline: 'none', flex: '1 1 200px', maxWidth: '320px', fontFamily: 'Inter, sans-serif' }} />
         </div>
 
         {filtered.length === 0 ? (

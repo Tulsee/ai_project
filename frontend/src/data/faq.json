@@ -1,8 +1,8 @@
 [
   {
     "question": "What services do you offer?",
-    "answer": "We offer ERP Integration, CRM Solutions, Custom Development, Cloud Consulting, Cloud Hosting and VPS Solutions. Visit the Solutions page to learn more about each.",
-    "keywords": ["service", "services", "offer", "solutions", "what do you do", "products"]
+    "answer": "We offer ERP Integration, CRM Services, Custom Development, Cloud Consulting, Cloud Hosting and VPS Services. Visit the Services page to learn more about each.",
+    "keywords": ["service", "services", "offer", "services", "what do you do", "products"]
   },
   {
     "question": "Which industries do you work with?",
@@ -21,7 +21,7 @@
   },
   {
     "question": "Do you offer cloud hosting?",
-    "answer": "Yes. We provide enterprise-grade Cloud Hosting with a 99.9% uptime SLA, auto-scaling, and 24/7 monitoring, plus high-performance VPS Solutions with dedicated resources.",
+    "answer": "Yes. We provide enterprise-grade Cloud Hosting with a 99.9% uptime SLA, auto-scaling, and 24/7 monitoring, plus high-performance VPS Services with dedicated resources.",
     "keywords": ["cloud", "hosting", "vps", "server", "uptime", "infrastructure"]
   },
   {

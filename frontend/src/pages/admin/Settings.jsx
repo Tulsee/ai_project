@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import * as store from '../../data/store'
+import ImageUploader from '../../components/admin/ImageUploader'
+import LogoMark from '../../components/LogoMark'
 import { card, input, label, btn, pageTitle } from '../../components/admin/ui'
 
 function Notice({ type, children }) {
@@ -59,7 +61,7 @@ export default function Settings() {
       <h2 style={pageTitle}>Settings</h2>
       <p style={{ fontSize: '14px', color: '#888', marginBottom: '28px' }}>Manage your admin account and global site controls.</p>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', alignItems: 'start' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px', alignItems: 'start' }}>
         {/* Account / password */}
         <div style={{ ...card, padding: '28px' }}>
           <h3 style={h3}>🔐 Account & Password</h3>
@@ -89,13 +91,28 @@ export default function Settings() {
             <Row label="Site Name">
               <input value={site.siteName} onChange={setSiteField('siteName')} style={input} />
             </Row>
-            <Row label="Logo Letter">
-              <input value={site.logoLetter} maxLength={2} onChange={setSiteField('logoLetter')} style={{ ...input, width: '80px' }} />
+            <Row label="Logo">
+              <div style={{ display: 'inline-flex', background: '#eef0f3', borderRadius: '8px', padding: '3px', marginBottom: '12px' }}>
+                {[{ id: 'text', label: 'Text letter' }, { id: 'image', label: 'Upload image' }].map((m) => {
+                  const active = (site.logoType || 'text') === m.id
+                  return (
+                    <button key={m.id} type="button" onClick={() => setSite((s) => ({ ...s, logoType: m.id }))}
+                      style={{ padding: '6px 16px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontSize: '13px', fontWeight: 600, fontFamily: 'Inter, sans-serif', background: active ? 'white' : 'transparent', color: active ? '#0A1F3D' : '#888', boxShadow: active ? '0 1px 4px rgba(0,0,0,0.1)' : 'none' }}>
+                      {m.label}
+                    </button>
+                  )
+                })}
+              </div>
+              {(site.logoType || 'text') === 'image' ? (
+                <ImageUploader value={site.logoImage || ''} onChange={(url) => setSite((s) => ({ ...s, logoImage: url }))} previewWidth={64} previewHeight={64} />
+              ) : (
+                <input value={site.logoLetter} maxLength={2} onChange={setSiteField('logoLetter')} placeholder="A" style={{ ...input, width: '80px' }} />
+              )}
             </Row>
             <Row label="Tagline">
               <textarea value={site.tagline} onChange={setSiteField('tagline')} rows={2} style={{ ...input, resize: 'vertical' }} />
             </Row>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginBottom: '8px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(90px, 1fr))', gap: '12px', marginBottom: '8px' }}>
               <ColorField label="Primary" value={site.primaryColor} onChange={setSiteField('primaryColor')} />
               <ColorField label="Dark" value={site.darkColor} onChange={setSiteField('darkColor')} />
               <ColorField label="Accent" value={site.accentColor} onChange={setSiteField('accentColor')} />
@@ -103,7 +120,7 @@ export default function Settings() {
 
             {/* Live logo preview */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#F5F6F8', borderRadius: '10px', padding: '14px 16px', margin: '16px 0' }}>
-              <div style={{ width: '36px', height: '36px', background: site.darkColor, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 800, fontSize: '18px', fontFamily: 'Montserrat, sans-serif' }}>{site.logoLetter}</div>
+              <LogoMark settings={site} boxColor={site.darkColor} />
               <span style={{ fontSize: '18px', fontWeight: 800, fontFamily: 'Montserrat, sans-serif', color: site.darkColor }}>
                 {site.siteName}<span style={{ color: site.primaryColor }}>.</span>
               </span>

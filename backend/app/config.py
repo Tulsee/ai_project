@@ -10,12 +10,21 @@ from pathlib import Path
 
 
 class Config:
-    APP_NAME: str = "AI-Solution API"
+    APP_NAME: str = "AI-Service API"
     VERSION: str = "1.0.0"
     API_PREFIX: str = "/api"
 
-    # Where JSON data files live (backend/data). Created automatically.
+    # Where data lives (backend/data). Created automatically on first run.
     DATA_DIR: Path = Path(__file__).resolve().parent.parent / "data"
+
+    # SQLite database file. Created and seeded automatically if it doesn't exist.
+    DB_PATH: Path = Path(os.getenv("AI_DB_PATH", str(DATA_DIR / "app.db")))
+
+    # Uploaded images are saved here and served at UPLOAD_URL_PREFIX. Created
+    # automatically on first run.
+    UPLOAD_DIR: Path = Path(__file__).resolve().parent.parent / "uploads"
+    UPLOAD_URL_PREFIX: str = API_PREFIX + "/uploads"
+    MAX_UPLOAD_BYTES: int = int(os.getenv("AI_MAX_UPLOAD_MB", "5")) * 1024 * 1024
 
     # Auth — change AI_SECRET_KEY in production!
     SECRET_KEY: str = os.getenv("AI_SECRET_KEY", "dev-secret-change-me")

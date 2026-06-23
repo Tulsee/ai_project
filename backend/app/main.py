@@ -1,4 +1,4 @@
-"""AI-Solution backend — FastAPI application entry point.
+"""AI-Service backend — FastAPI application entry point.
 
 Run from the ``backend`` directory:
 
@@ -6,21 +6,22 @@ Run from the ``backend`` directory:
 
 Interactive API docs: http://127.0.0.1:8000/docs
 """
+
 from __future__ import annotations
 
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from . import storage
 from .config import config
-from .routers import auth, chat, collections, dashboard, inquiries, settings
-
+from .routers import auth, chat, collections, dashboard, inquiries, settings, uploads
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    # Create data files with seed content on first launch.
+    # Create the SQLite database and load seed content on first launch.
     storage.ensure_seeded()
     yield
 
@@ -53,9 +54,17 @@ for r in (
     collections.events_router,
     collections.photos_router,
     collections.blogs_router,
+    collections.testimonials_router,
     inquiries.router,
     settings.router,
     dashboard.router,
     chat.router,
+    uploads.router,
 ):
     app.include_router(r, prefix=config.API_PREFIX)
+
+# Serve uploaded images as static files (e.g. /api/uploads/<filename>).
+config.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+app.mount(
+    config.UPLOAD_URL_PREFIX, StaticFiles(directory=config.UPLOAD_DIR), name="uploads"
+)

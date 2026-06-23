@@ -1,26 +1,23 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import * as store from '../data/store'
+import PageHero from '../components/PageHero'
 
 export default function Articles() {
   const [articles, setArticles] = useState(() => store.getAll('blogs'))
-  useEffect(() => store.subscribe(() => setArticles(store.getAll('blogs'))), [])
+  const [settings, setSettings] = useState(() => store.getSettings())
+  useEffect(() => store.subscribe(() => {
+    setArticles(store.getAll('blogs'))
+    setSettings(store.getSettings())
+  }), [])
 
   return (
     <div>
-      <section style={{ background: 'linear-gradient(135deg, #0A1F3D 0%, #0072CE 100%)', padding: '80px 24px', textAlign: 'center' }}>
-        <div style={{ display: 'inline-block', background: 'rgba(232,25,44,0.25)', color: '#E8192C', padding: '6px 16px', borderRadius: '20px', fontSize: '12px', fontWeight: '700', letterSpacing: '1px', marginBottom: '20px' }}>INSIGHTS & ARTICLES</div>
-        <h1 style={{ fontSize: 'clamp(28px, 4vw, 52px)', fontWeight: '900', fontFamily: 'Montserrat, sans-serif', color: 'white', marginBottom: '16px' }}>
-          Latest Insights
-        </h1>
-        <p style={{ fontSize: '18px', color: 'rgba(255,255,255,0.8)', maxWidth: '540px', margin: '0 auto', lineHeight: 1.7 }}>
-          Expert perspectives on enterprise technology, digital transformation, and industry trends.
-        </p>
-      </section>
+      <PageHero page="articles" settings={settings} />
 
       <section style={{ background: '#F5F6F8', padding: '72px 24px' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '28px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '28px' }}>
             {articles.map((a) => <ArticleCard key={a.id} a={a} />)}
           </div>
         </div>
@@ -41,7 +38,10 @@ function ArticleCard({ a }) {
       </div>
       <div style={{ padding: '16px 28px', borderTop: '1px solid #f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{ width: '32px', height: '32px', background: '#0A1F3D', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '12px', fontWeight: '700', flexShrink: 0 }}>{a.author.charAt(0)}</div>
+          <div style={{ position: 'relative', width: '32px', height: '32px', background: '#0A1F3D', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '12px', fontWeight: '700', flexShrink: 0, overflow: 'hidden' }}>
+            {(a.author || '?').charAt(0)}
+            {a.authorImage && <img src={a.authorImage} alt={a.author} loading="lazy" onError={(e) => { e.currentTarget.style.display = 'none' }} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />}
+          </div>
           <div>
             <div style={{ fontSize: '12px', fontWeight: '600', color: '#333' }}>{a.author}</div>
             <div style={{ fontSize: '11px', color: '#aaa' }}>{a.date}</div>

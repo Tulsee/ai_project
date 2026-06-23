@@ -61,3 +61,29 @@ export const get = (path, opts) => request(path, { ...opts, method: 'GET' })
 export const post = (path, body, opts) => request(path, { ...opts, method: 'POST', body })
 export const put = (path, body, opts) => request(path, { ...opts, method: 'PUT', body })
 export const del = (path, opts) => request(path, { ...opts, method: 'DELETE' })
+
+// ── Image upload (multipart) ──
+// Sends a File to the backend, which saves it and returns { url, filename }.
+// The returned url (e.g. "/api/uploads/<name>.png") is what we store on the doc.
+export async function upload(file) {
+  const form = new FormData()
+  form.append('file', file)
+  const headers = {}
+  if (getToken()) headers['Authorization'] = `Bearer ${getToken()}`
+
+  let res
+  try {
+    // NOTE: don't set Content-Type — the browser adds the multipart boundary.
+    res = await fetch(`${BASE}/upload`, { method: 'POST', headers, body: form })
+  } catch {
+    throw new Error('Cannot reach the server. Is the backend running?')
+  }
+
+  if (res.status === 401) clearToken()
+  if (!res.ok) {
+    let detail = res.statusText
+    try { const data = await res.json(); detail = data.detail || detail } catch { /* non-JSON */ }
+    throw new Error(typeof detail === 'string' ? detail : 'Upload failed')
+  }
+  return res.json()
+}

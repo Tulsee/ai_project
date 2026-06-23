@@ -38,6 +38,7 @@ def stats(_: str = Depends(get_current_user)):
             "events": len(storage.list_items("events")),
             "photos": len(storage.list_items("photos")),
             "blogs": len(storage.list_items("blogs")),
+            "testimonials": len(storage.list_items("testimonials")),
             "inquiries": len(inquiries),
         },
         "inquiriesThisWeek": this_week,

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import * as store from '../data/store'
+import { useIsMobile } from '../hooks/useMediaQuery'
 
 const COUNTRIES = ['Koshi', 'Madhesh', 'Bagmati', 'Gandaki', 'Lumbini', 'Karnali', 'Sudurpashchim', 'Other']
 
@@ -62,6 +63,7 @@ export default function Contact() {
   const [errors, setErrors] = useState({})
   const [submitted, setSubmitted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const isMobile = useIsMobile()
 
   const set = (k) => (e) => setForm(f => ({ ...f, [k]: e.target.value }))
 
@@ -127,14 +129,14 @@ export default function Contact() {
       </section>
 
       <section style={{ background: '#F5F6F8', padding: '64px 24px' }}>
-        <div style={{ maxWidth: '1100px', margin: '0 auto', display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '40px' }}>
+        <div style={{ maxWidth: '1100px', margin: '0 auto', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '2fr 1fr', gap: '40px' }}>
           {/* Form */}
-          <div style={{ background: 'white', borderRadius: '16px', padding: '40px', boxShadow: '0 2px 20px rgba(0,0,0,0.07)' }}>
+          <div style={{ background: 'white', borderRadius: '16px', padding: 'clamp(24px, 5vw, 40px)', boxShadow: '0 2px 20px rgba(0,0,0,0.07)' }}>
             <h2 style={{ fontSize: '22px', fontWeight: '700', fontFamily: 'Montserrat, sans-serif', color: '#0A1F3D', marginBottom: '8px' }}>Send us a Message</h2>
             <p style={{ fontSize: '14px', color: '#888', marginBottom: '32px' }}>Fill in the details below and we'll respond within 24 hours.</p>
 
             <form onSubmit={handleSubmit} noValidate>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 20px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '0 20px' }}>
                 <Field label="Full Name *" error={errors.name}>
                   <Input value={form.name} onChange={set('name')} placeholder="John Smith" />
                 </Field>

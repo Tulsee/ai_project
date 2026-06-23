@@ -1,5 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import * as store from '../data/store'
+import PageHero from '../components/PageHero'
 
 const INDUSTRIES = [
   {
@@ -44,20 +46,24 @@ const INDUSTRIES = [
   },
 ]
 
-function IndustryCard({ ind }) {
+function IndustryCard({ ind, settings }) {
   const [open, setOpen] = useState(false)
+  // Accent + header colours follow the brand colours set in the admin panel.
+  const accent = settings.primaryColor
+  const dark = settings.darkColor
   return (
     <div style={{ background: 'white', borderRadius: '14px', overflow: 'hidden', boxShadow: '0 2px 16px rgba(0,0,0,0.08)', marginBottom: '20px' }}>
       {/* Header */}
       <div
         onClick={() => setOpen(o => !o)}
         style={{
-          background: '#0A1F3D', padding: '28px 32px',
+          background: dark, padding: '24px clamp(20px, 4vw, 32px)',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          gap: '16px', flexWrap: 'wrap',
           cursor: 'pointer', userSelect: 'none',
         }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-          <div style={{ width: '56px', height: '56px', background: `${ind.color}25`, borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '26px', flexShrink: 0 }}>{ind.icon}</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flex: '1 1 240px', minWidth: 0 }}>
+          <div style={{ width: '56px', height: '56px', background: `${accent}25`, borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '26px', flexShrink: 0 }}>{ind.icon}</div>
           <div>
             <div style={{ fontSize: '20px', fontWeight: '700', color: 'white', fontFamily: 'Montserrat, sans-serif' }}>{ind.title}</div>
             <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)', marginTop: '3px' }}>{ind.desc}</div>
@@ -65,7 +71,7 @@ function IndustryCard({ ind }) {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '32px', fontWeight: '900', color: ind.color, fontFamily: 'Montserrat, sans-serif', lineHeight: 1 }}>{ind.metric}</div>
+            <div style={{ fontSize: '32px', fontWeight: '900', color: accent, fontFamily: 'Montserrat, sans-serif', lineHeight: 1 }}>{ind.metric}</div>
             <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.55)', marginTop: '4px' }}>{ind.metricLabel}</div>
           </div>
           <div style={{ width: '36px', height: '36px', background: 'rgba(255,255,255,0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '18px', flexShrink: 0, transition: 'transform 0.3s', transform: open ? 'rotate(180deg)' : 'rotate(0)' }}>
@@ -76,29 +82,29 @@ function IndustryCard({ ind }) {
 
       {/* Body */}
       {open && (
-        <div style={{ padding: '36px 32px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px', marginBottom: '28px' }}>
+        <div style={{ padding: '32px clamp(20px, 4vw, 32px)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '32px', marginBottom: '28px' }}>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
                 <div style={{ width: '28px', height: '28px', background: '#fee2e2', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px' }}>⚠️</div>
-                <h4 style={{ fontSize: '16px', fontWeight: '700', color: '#0A1F3D', fontFamily: 'Montserrat, sans-serif' }}>The Challenge</h4>
+                <h4 style={{ fontSize: '16px', fontWeight: '700', color: dark, fontFamily: 'Montserrat, sans-serif' }}>The Challenge</h4>
               </div>
               <p style={{ fontSize: '14px', color: '#666', lineHeight: 1.75 }}>{ind.challenge}</p>
             </div>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
                 <div style={{ width: '28px', height: '28px', background: '#dcfce7', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px' }}>✅</div>
-                <h4 style={{ fontSize: '16px', fontWeight: '700', color: '#0A1F3D', fontFamily: 'Montserrat, sans-serif' }}>Our Solution</h4>
+                <h4 style={{ fontSize: '16px', fontWeight: '700', color: dark, fontFamily: 'Montserrat, sans-serif' }}>Our Service</h4>
               </div>
               <p style={{ fontSize: '14px', color: '#666', lineHeight: 1.75 }}>{ind.solution}</p>
             </div>
           </div>
           <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '24px' }}>
             {ind.tags.map(tag => (
-              <span key={tag} style={{ background: `${ind.color}15`, color: ind.color, padding: '5px 14px', borderRadius: '20px', fontSize: '12px', fontWeight: '600' }}>{tag}</span>
+              <span key={tag} style={{ background: `${accent}15`, color: accent, padding: '5px 14px', borderRadius: '20px', fontSize: '12px', fontWeight: '600' }}>{tag}</span>
             ))}
           </div>
-          <Link to="/contact" style={{ background: ind.color, color: 'white', padding: '12px 28px', borderRadius: '25px', fontSize: '14px', fontWeight: '600', display: 'inline-block' }}>
+          <Link to="/contact" style={{ background: accent, color: 'white', padding: '12px 28px', borderRadius: '25px', fontSize: '14px', fontWeight: '600', display: 'inline-block' }}>
             Discuss Your Project →
           </Link>
         </div>
@@ -108,21 +114,16 @@ function IndustryCard({ ind }) {
 }
 
 export default function Industries() {
+  const [settings, setSettings] = useState(() => store.getSettings())
+  useEffect(() => store.subscribe(() => setSettings(store.getSettings())), [])
+
   return (
     <div>
-      <section style={{ background: 'linear-gradient(135deg, #0A1F3D 0%, #0072CE 100%)', padding: '80px 24px', textAlign: 'center' }}>
-        <div style={{ display: 'inline-block', background: 'rgba(232,25,44,0.25)', color: '#E8192C', padding: '6px 16px', borderRadius: '20px', fontSize: '12px', fontWeight: '700', letterSpacing: '1px', marginBottom: '20px' }}>INDUSTRIES</div>
-        <h1 style={{ fontSize: 'clamp(28px, 4vw, 52px)', fontWeight: '900', fontFamily: 'Montserrat, sans-serif', color: 'white', marginBottom: '16px' }}>
-          Industry-Specific Solutions
-        </h1>
-        <p style={{ fontSize: '18px', color: 'rgba(255,255,255,0.8)', maxWidth: '560px', margin: '0 auto', lineHeight: 1.7 }}>
-          Deep domain expertise across 5 key verticals with proven, measurable outcomes.
-        </p>
-      </section>
+      <PageHero page="industries" settings={settings} />
 
       <section style={{ background: '#F5F6F8', padding: '64px 24px' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
-          {INDUSTRIES.map((ind, i) => <IndustryCard key={i} ind={ind} />)}
+          {INDUSTRIES.map((ind, i) => <IndustryCard key={i} ind={ind} settings={settings} />)}
         </div>
       </section>
     </div>

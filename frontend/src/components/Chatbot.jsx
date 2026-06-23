@@ -2,6 +2,12 @@ import { useState, useEffect, useRef } from 'react'
 import * as store from '../data/store'
 import faq from '../data/faq.json'
 
+// Any component can pop the assistant open by calling openAssistant().
+export const OPEN_CHAT_EVENT = 'ai-open-chat'
+export function openAssistant() {
+  window.dispatchEvent(new CustomEvent(OPEN_CHAT_EVENT))
+}
+
 // ── Match a user message against the FAQ list ───────────────────────────────
 // Simple keyword + word-overlap scoring. Returns the best answer, or null.
 function findAnswer(input) {
@@ -92,6 +98,13 @@ export default function Chatbot() {
 
   useEffect(() => store.subscribe(() => setSettings(store.getSettings())), [])
   useEffect(() => () => clearTimeout(timer.current), [])
+
+  // Let any CTA across the site open the assistant (see openAssistant()).
+  useEffect(() => {
+    const open = () => setOpen(true)
+    window.addEventListener(OPEN_CHAT_EVENT, open)
+    return () => window.removeEventListener(OPEN_CHAT_EVENT, open)
+  }, [])
 
   // Auto-scroll to the latest message / typing indicator
   useEffect(() => {

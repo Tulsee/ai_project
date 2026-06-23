@@ -30,10 +30,9 @@ class EventIn(BaseModel):
 
 
 class PhotoIn(BaseModel):
-    icon: str = "🖼️"
     title: str
     subtitle: str = ""
-    gradient: str = "linear-gradient(135deg, #0A1F3D, #0072CE)"
+    image: str = ""  # URL of the gallery photo
 
 
 class BlogIn(BaseModel):
@@ -43,8 +42,26 @@ class BlogIn(BaseModel):
     borderColor: str = "#0072CE"
     excerpt: str = ""
     author: str = ""
+    authorImage: str = ""  # URL of the author's avatar
     date: str = ""
     readTime: str = "5 min read"
+
+
+# ── Testimonials ───────────────────────────────────────────────────────────────
+class TestimonialIn(BaseModel):
+    name: str
+    title: str = ""
+    company: str = ""
+    country: str = ""
+    rating: int = 5
+    category: str = ""
+    image: str = ""  # URL of the client's photo
+    text: str = ""
+
+    @field_validator("rating")
+    @classmethod
+    def _clamp_rating(cls, v: int) -> int:
+        return max(1, min(5, v))
 
 
 # ── Inquiries ──────────────────────────────────────────────────────────────────
@@ -70,11 +87,22 @@ class InquiryIn(BaseModel):
 class SettingsIn(BaseModel):
     """Partial update — every field optional."""
     siteName: Optional[str] = None
+    logoType: Optional[str] = None  # "text" | "image"
     logoLetter: Optional[str] = None
+    logoImage: Optional[str] = None
     tagline: Optional[str] = None
     primaryColor: Optional[str] = None
     darkColor: Optional[str] = None
     accentColor: Optional[str] = None
+    # Per-page banner background images
+    bannerHome: Optional[str] = None
+    bannerSolutions: Optional[str] = None
+    bannerIndustries: Optional[str] = None
+    bannerTestimonials: Optional[str] = None
+    bannerArticles: Optional[str] = None
+    bannerGallery: Optional[str] = None
+    # Per-page hero text + text colour: { page: { badge, title, subtitle, textColor } }
+    heroes: Optional[dict] = None
 
 
 # ── Auth ───────────────────────────────────────────────────────────────────────

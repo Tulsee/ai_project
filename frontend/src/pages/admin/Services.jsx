@@ -5,7 +5,7 @@ export default function Services() {
     <ResourceManager
       resource="services"
       title="Service Portfolio"
-      subtitle="Manage the solutions shown on the Home and Solutions pages."
+      subtitle="Manage the services shown on the Home and Services pages."
       addLabel="Add Service"
       columns={[
         { key: 'title', label: 'Title', render: (i) => (

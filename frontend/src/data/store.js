@@ -10,16 +10,46 @@
 
 import * as api from './api'
 
+const DEFAULT_HEROES = {
+  home: { badge: 'AI-Powered Software Services', title: 'Transforming Business Through AI-Powered Software Services', subtitle: 'We deliver cutting-edge enterprise software that drives growth, efficiency, and digital transformation for businesses across the globe.', textColor: '#ffffff' },
+  services: { badge: 'OUR SERVICES', title: 'Enterprise Software Services', subtitle: 'From ERP to VPS — a complete suite of AI-powered services that drive real business results.', textColor: '#ffffff' },
+  industries: { badge: 'INDUSTRIES', title: 'Industry-Specific Services', subtitle: 'Deep domain expertise across 5 key verticals with proven, measurable outcomes.', textColor: '#ffffff' },
+  testimonials: { badge: 'CLIENT STORIES', title: 'What Our Clients Say', subtitle: 'Real results from real clients across all 7 provinces of Nepal and 5 industries.', textColor: '#ffffff' },
+  articles: { badge: 'INSIGHTS & ARTICLES', title: 'Latest Insights', subtitle: 'Expert perspectives on enterprise technology, digital transformation, and industry trends.', textColor: '#ffffff' },
+  gallery: { badge: 'GALLERY & EVENTS', title: 'Our Moments & Events', subtitle: 'Conferences, workshops, and milestones that define our journey.', textColor: '#ffffff' },
+}
+
 const DEFAULT_SETTINGS = {
   siteName: 'AI-Solution',
+  logoType: 'text', // 'text' | 'image'
   logoLetter: 'A',
-  tagline: 'Transforming businesses through innovative AI-powered software solutions.',
+  logoImage: '',
+  tagline: 'Transforming businesses through innovative AI-powered software services.',
   primaryColor: '#E8192C',
   darkColor: '#0A1F3D',
   accentColor: '#0072CE',
+  // Per-page banner background images
+  bannerHome: 'https://picsum.photos/seed/ai-hero-home/1600/600',
+  bannerSolutions: 'https://picsum.photos/seed/ai-services/1600/600',
+  bannerIndustries: 'https://picsum.photos/seed/ai-industries/1600/600',
+  bannerTestimonials: 'https://picsum.photos/seed/ai-testimonials/1600/600',
+  bannerArticles: 'https://picsum.photos/seed/ai-articles/1600/600',
+  bannerGallery: 'https://picsum.photos/seed/ai-gallery/1600/600',
+  heroes: DEFAULT_HEROES,
 }
 
-const PUBLIC_COLLECTIONS = ['services', 'events', 'photos', 'blogs']
+// Merge backend settings over the defaults, deep-merging the per-page heroes so
+// every page always has a full { badge, title, subtitle, textColor } shape.
+function mergeSettings(incoming = {}) {
+  const merged = { ...DEFAULT_SETTINGS, ...incoming }
+  merged.heroes = {}
+  for (const page of Object.keys(DEFAULT_HEROES)) {
+    merged.heroes[page] = { ...DEFAULT_HEROES[page], ...((incoming.heroes && incoming.heroes[page]) || {}) }
+  }
+  return merged
+}
+
+const PUBLIC_COLLECTIONS = ['services', 'events', 'photos', 'blogs', 'testimonials']
 
 // In-memory cache that components read synchronously.
 const cache = {
@@ -27,6 +57,7 @@ const cache = {
   events: [],
   photos: [],
   blogs: [],
+  testimonials: [],
   inquiries: [],
   settings: { ...DEFAULT_SETTINGS },
 }
@@ -58,7 +89,7 @@ export async function hydratePublic() {
     api.get('/settings'),
     ...PUBLIC_COLLECTIONS.map((r) => api.get(`/${r}`)),
   ])
-  cache.settings = { ...DEFAULT_SETTINGS, ...settings }
+  cache.settings = mergeSettings(settings)
   PUBLIC_COLLECTIONS.forEach((r, i) => { cache[r] = lists[i] })
   applyTheme(cache.settings)
   emit()
@@ -112,10 +143,26 @@ export async function clear(resource) {
 // ── Settings ──────────────────────────────────────────────────────────────────
 export async function saveSettings(patch) {
   const updated = await api.put('/settings', patch, { auth: true })
-  cache.settings = { ...DEFAULT_SETTINGS, ...updated }
+  cache.settings = mergeSettings(updated)
   applyTheme(cache.settings)
   emit()
   return cache.settings
+}
+
+// Build a page-hero background. When a banner image is set we show the image
+// itself (no brand-colour tint) with only a light neutral scrim so the white
+// heading stays readable. With no image we fall back to the brand gradient.
+export function bannerBg(url) {
+  const scrim = 'linear-gradient(rgba(0,0,0,0.30), rgba(0,0,0,0.45))'
+  return url
+    ? `${scrim}, url("${url}") center / cover no-repeat`
+    : 'linear-gradient(135deg, #0A1F3D 0%, #0072CE 100%)'
+}
+
+// True when a usable banner image URL is set (used to hide brand-colour
+// decorations on the hero when a photo is shown).
+export function hasBanner(url) {
+  return typeof url === 'string' && url.trim() !== ''
 }
 
 export function applyTheme(settings = cache.settings) {

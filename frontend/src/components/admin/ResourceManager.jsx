@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import * as store from '../../data/store'
+import ImageUploader from './ImageUploader'
+import { useDialog } from '../ui/Dialog'
 import { card, input, label, btn, ghostBtn, pageTitle } from './ui'
 
 // Config-driven CRUD manager used for Services, Events, Photos and Blogs.
@@ -15,6 +17,7 @@ export default function ResourceManager({ resource, title, subtitle, addLabel = 
   const [open, setOpen] = useState(false)
   const [form, setForm] = useState({})
   const [editingId, setEditingId] = useState(null)
+  const { confirm, alert } = useDialog()
 
   useEffect(() => {
     const refresh = () => setItems(store.getAll(resource))
@@ -37,16 +40,20 @@ export default function ResourceManager({ resource, title, subtitle, addLabel = 
       await store.save(resource, payload)
       setOpen(false)
     } catch (err) {
-      alert(err.message || 'Could not save. Please try again.')
+      alert({ title: 'Could not save', message: err.message || 'Could not save. Please try again.' })
     }
   }
   const handleDelete = async (item) => {
-    if (window.confirm(`Delete "${item[columns[0].key] || 'this item'}"? This cannot be undone.`)) {
-      try {
-        await store.remove(resource, item.id)
-      } catch (err) {
-        alert(err.message || 'Could not delete. Please try again.')
-      }
+    const ok = await confirm({
+      title: 'Delete item',
+      message: `Delete "${item[columns[0].key] || 'this item'}"? This cannot be undone.`,
+      confirmLabel: 'Delete',
+    })
+    if (!ok) return
+    try {
+      await store.remove(resource, item.id)
+    } catch (err) {
+      alert({ title: 'Could not delete', message: err.message || 'Could not delete. Please try again.' })
     }
   }
   const setField = (key, val) => setForm((f) => ({ ...f, [key]: val }))
@@ -108,7 +115,7 @@ export default function ResourceManager({ resource, title, subtitle, addLabel = 
             </div>
 
             <form onSubmit={handleSave}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 18px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0 18px' }}>
                 {fields.map((f) => (
                   <div key={f.key} style={{ marginBottom: '16px', gridColumn: f.full || f.type === 'textarea' || f.type === 'list' ? '1 / -1' : 'auto' }}>
                     <label style={label}>{f.label}</label>
@@ -133,18 +140,7 @@ function FieldInput({ field, value, onChange }) {
     return <textarea value={value || ''} onChange={(e) => onChange(e.target.value)} rows={3} style={{ ...input, resize: 'vertical', minHeight: '80px' }} />
   }
   if (field.type === 'list') {
-    return (
-      <>
-        <textarea
-          value={Array.isArray(value) ? value.join('\n') : ''}
-          onChange={(e) => onChange(e.target.value.split('\n').map((s) => s.trim()).filter(Boolean))}
-          rows={5}
-          placeholder="One item per line"
-          style={{ ...input, resize: 'vertical', minHeight: '110px' }}
-        />
-        <div style={{ fontSize: '11px', color: '#aaa', marginTop: '4px' }}>One item per line</div>
-      </>
-    )
+    return <ListInput value={value} onChange={onChange} />
   }
   if (field.type === 'select') {
     return (
@@ -166,7 +162,48 @@ function FieldInput({ field, value, onChange }) {
       </div>
     )
   }
-  return <input value={value || ''} onChange={(e) => onChange(e.target.value)} style={input} />
+  if (field.type === 'image') {
+    return <ImageUploader value={value || ''} onChange={onChange} />
+  }
+  if (field.type === 'number') {
+    return (
+      <input
+        type="number"
+        value={value ?? ''}
+        min={field.min}
+        max={field.max}
+        onChange={(e) => onChange(e.target.value === '' ? '' : Number(e.target.value))}
+        style={input}
+      />
+    )
+  }
+  return <input value={value || ''} onChange={(e) => onChange(e.target.value)} placeholder={field.placeholder} style={input} />
+}
+
+// Multi-line "one item per line" editor. Keeps the raw text locally so newlines
+// and in-progress whitespace survive while typing; the parent form only ever
+// receives the cleaned array (trimmed, blanks removed).
+function ListInput({ value, onChange }) {
+  const [text, setText] = useState(() => (Array.isArray(value) ? value.join('\n') : (value || '')))
+
+  const handleChange = (e) => {
+    const raw = e.target.value
+    setText(raw)
+    onChange(raw.split('\n').map((s) => s.trim()).filter(Boolean))
+  }
+
+  return (
+    <>
+      <textarea
+        value={text}
+        onChange={handleChange}
+        rows={5}
+        placeholder="One item per line"
+        style={{ ...input, resize: 'vertical', minHeight: '110px' }}
+      />
+      <div style={{ fontSize: '11px', color: '#aaa', marginTop: '4px' }}>One item per line</div>
+    </>
+  )
 }
 
 const th = { padding: '12px 16px', textAlign: 'left', fontSize: '12px', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', borderBottom: '1px solid #f0f0f0', whiteSpace: 'nowrap' }

@@ -14,7 +14,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 
 from .. import storage
-from ..schemas import BlogIn, EventIn, PhotoIn, ServiceIn
+from ..schemas import BlogIn, EventIn, PhotoIn, ServiceIn, TestimonialIn
 from ..security import get_current_user
 
 
@@ -56,3 +56,4 @@ services_router = _make_router("services", ServiceIn)
 events_router = _make_router("events", EventIn)
 photos_router = _make_router("photos", PhotoIn)
 blogs_router = _make_router("blogs", BlogIn)
+testimonials_router = _make_router("testimonials", TestimonialIn)
