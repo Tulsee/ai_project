@@ -16,6 +16,7 @@ again without touching the API.
 from __future__ import annotations
 
 import json
+import logging
 import sqlite3
 import threading
 import uuid
@@ -23,6 +24,8 @@ from typing import Any
 
 from . import seed
 from .config import config
+
+log = logging.getLogger("app.storage")
 
 _lock = threading.RLock()
 _conn: sqlite3.Connection | None = None
@@ -44,25 +47,43 @@ def _connect() -> sqlite3.Connection:
     use. The file is created automatically if it does not exist."""
     global _conn
     if _conn is None:
+        db_existed = config.DB_PATH.exists()
         config.DATA_DIR.mkdir(parents=True, exist_ok=True)
         # check_same_thread=False is safe here because every access goes through
         # the module-level RLock below.
         _conn = sqlite3.connect(str(config.DB_PATH), check_same_thread=False)
+        if db_existed:
+            log.info("Opened existing database at %s", config.DB_PATH)
+        else:
+            log.info("No database found - creating a new one at %s", config.DB_PATH)
         _conn.execute("PRAGMA journal_mode=WAL")
-        _conn.execute(
-            "CREATE TABLE IF NOT EXISTS documents ("
-            "  collection TEXT NOT NULL,"
-            "  id         TEXT NOT NULL,"
-            "  data       TEXT NOT NULL,"
-            "  PRIMARY KEY (collection, id)"
-            ")"
-        )
-        _conn.execute(
-            "CREATE TABLE IF NOT EXISTS docs ("
-            "  name TEXT PRIMARY KEY,"
-            "  data TEXT NOT NULL"
-            ")"
-        )
+        for table, ddl in (
+            (
+                "documents",
+                "CREATE TABLE IF NOT EXISTS documents ("
+                "  collection TEXT NOT NULL,"
+                "  id         TEXT NOT NULL,"
+                "  data       TEXT NOT NULL,"
+                "  PRIMARY KEY (collection, id)"
+                ")",
+            ),
+            (
+                "docs",
+                "CREATE TABLE IF NOT EXISTS docs ("
+                "  name TEXT PRIMARY KEY,"
+                "  data TEXT NOT NULL"
+                ")",
+            ),
+        ):
+            existed = _conn.execute(
+                "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?",
+                (table,),
+            ).fetchone() is not None
+            _conn.execute(ddl)
+            if existed:
+                log.info("Table %r already exists", table)
+            else:
+                log.info("Created table %r", table)
         _conn.commit()
     return _conn
 
@@ -88,7 +109,10 @@ def ensure_seeded() -> None:
         conn = _connect()  # opens/creates the file and tables
         already_seeded = _doc_exists("credentials")
 
-        if not already_seeded:
+        if already_seeded:
+            log.info("Database already seeded - skipping seed data")
+        else:
+            log.info("Seeding database with initial data")
             for name in COLLECTIONS:
                 for item in _SEED[name]:
                     doc = {**item, "id": _new_id()}
@@ -96,12 +120,16 @@ def ensure_seeded() -> None:
                         "INSERT INTO documents (collection, id, data) VALUES (?, ?, ?)",
                         (name, doc["id"], json.dumps(doc, ensure_ascii=False)),
                     )
+                log.info("Seeded %d %s", len(_SEED[name]), name)
 
         if not _doc_exists("settings"):
             set_doc("settings", seed.SETTINGS)
+            log.info("Seeded default settings")
         if not _doc_exists("credentials"):
             set_doc("credentials", seed.default_credentials(
                 config.DEFAULT_ADMIN_USER, config.DEFAULT_ADMIN_PASSWORD))
+            log.info("Created default admin credentials (user=%r)",
+                     config.DEFAULT_ADMIN_USER)
 
         conn.commit()
 

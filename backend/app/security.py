@@ -12,6 +12,7 @@ import base64
 import hashlib
 import hmac
 import json
+import re
 import secrets
 import time
 
@@ -22,6 +23,8 @@ from .config import config
 
 _PBKDF2_ITERATIONS = 200_000
 _bearer = HTTPBearer(auto_error=False)
+# At least 8 chars with one lowercase, one uppercase, one digit, one special char.
+_PASSWORD_POLICY = re.compile(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$")
 
 
 # ── Password hashing ──────────────────────────────────────────────────────────
@@ -40,6 +43,10 @@ def verify_password(password: str, stored: str) -> bool:
         return hmac.compare_digest(dk, _b64d(hash_b64))
     except (ValueError, TypeError):
         return False
+
+
+def password_meets_policy(password: str) -> bool:
+    return bool(_PASSWORD_POLICY.match(password))
 
 
 # ── Tokens ────────────────────────────────────────────────────────────────────

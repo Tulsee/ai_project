@@ -5,7 +5,13 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from .. import storage
 from ..schemas import ChangeCredentialsIn, LoginIn, TokenOut
-from ..security import create_token, get_current_user, hash_password, verify_password
+from ..security import (
+    create_token,
+    get_current_user,
+    hash_password,
+    password_meets_policy,
+    verify_password,
+)
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -28,8 +34,11 @@ def change_credentials(body: ChangeCredentialsIn, username: str = Depends(get_cu
     creds = storage.get_doc("credentials")
     if not verify_password(body.current_password, creds.get("password_hash", "")):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Current password is incorrect.")
-    if body.new_password and len(body.new_password) < 6:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="New password must be at least 6 characters.")
+    if body.new_password and not password_meets_policy(body.new_password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="New password must be at least 8 characters and include one uppercase letter, one lowercase letter, one number, and one special character.",
+        )
 
     patch: dict = {}
     if body.new_username:

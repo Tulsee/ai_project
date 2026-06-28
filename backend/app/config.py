@@ -32,7 +32,7 @@ class Config:
 
     # Default admin account created on first run.
     DEFAULT_ADMIN_USER: str = os.getenv("AI_ADMIN_USER", "admin")
-    DEFAULT_ADMIN_PASSWORD: str = os.getenv("AI_ADMIN_PASSWORD", "admin123")
+    DEFAULT_ADMIN_PASSWORD: str = os.getenv("AI_ADMIN_PASSWORD", "AiAdmin@2026")
 
     # CORS — the Vite dev server origins.
     CORS_ORIGINS: list[str] = os.getenv(

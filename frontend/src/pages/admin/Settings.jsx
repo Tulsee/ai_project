@@ -4,6 +4,9 @@ import ImageUploader from '../../components/admin/ImageUploader'
 import LogoMark from '../../components/LogoMark'
 import { card, input, label, btn, pageTitle } from '../../components/admin/ui'
 
+// At least 8 chars with one lowercase, one uppercase, one digit, one special char.
+const PASSWORD_POLICY = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/
+
 function Notice({ type, children }) {
   if (!children) return null
   const ok = type === 'ok'
@@ -22,7 +25,12 @@ export default function Settings() {
   const saveAccount = async (e) => {
     e.preventDefault()
     if (!account.current) return setAccountMsg({ type: 'err', text: 'Enter your current password to save changes.' })
-    if (account.next && account.next.length < 6) return setAccountMsg({ type: 'err', text: 'New password must be at least 6 characters.' })
+    if (account.next && !PASSWORD_POLICY.test(account.next)) {
+      return setAccountMsg({
+        type: 'err',
+        text: 'New password must be at least 8 characters and include one uppercase letter, one lowercase letter, one number, and one special character.',
+      })
+    }
     if (account.next !== account.confirm) return setAccountMsg({ type: 'err', text: 'New password and confirmation do not match.' })
     try {
       await store.saveCredentials({
@@ -75,6 +83,9 @@ export default function Settings() {
             </Row>
             <Row label="New Password">
               <input type="password" value={account.next} onChange={(e) => setAccount((a) => ({ ...a, next: e.target.value }))} placeholder="Leave blank to keep current" style={input} />
+              <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '6px', lineHeight: 1.4 }}>
+                Use at least 8 characters with one uppercase letter, one lowercase letter, one number, and one special character.
+              </div>
             </Row>
             <Row label="Confirm New Password">
               <input type="password" value={account.confirm} onChange={(e) => setAccount((a) => ({ ...a, confirm: e.target.value }))} style={input} />
